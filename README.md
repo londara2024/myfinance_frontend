@@ -163,6 +163,22 @@ reads from it directly.
 
 ## Deploying
 
+### Vercel
+
+No `vercel.json` needed — Vercel auto-detects Next.js.
+
+1. Vercel dashboard → **Add New Project** → import `londara2024/myfinance_frontend`.
+2. **Settings → Environment Variables** → add `BACKEND_URL` = `https://myfinance-backend-38rs.onrender.com`
+   (no trailing slash — the code strips it anyway, but cleaner without). Apply to **Production**
+   (and Preview/Development too if you want preview deploys to hit the live backend).
+3. Deploy.
+
+`BACKEND_URL` is read **at build time**, not just at runtime — Next evaluates it while collecting
+route configuration (see [lib/api/client.ts](src/lib/api/client.ts)). Set it *before* the first
+deploy; adding it afterwards means the next deploy needs to be re-triggered to pick it up.
+
+### Render
+
 See **[docs/DEPLOY-RENDER.md](docs/DEPLOY-RENDER.md)** for the step-by-step Render runbook.
 
 Short version: a **Node** service, `npm ci --include=dev && npm run build` / `npm start`, no Root Directory (this

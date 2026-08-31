@@ -34,7 +34,7 @@ function resolveBackendUrl(): string {
   if (process.env.NODE_ENV === "production") {
     throw new Error(
       "BACKEND_URL is not set. Point it at the Spring Boot API, e.g. " +
-        "BACKEND_URL=https://myfinance-backend-aidt.onrender.com",
+        "BACKEND_URL=https://myfinance-backend-38rs.onrender.com",
     );
   }
   return "http://localhost:8080";

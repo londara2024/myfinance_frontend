@@ -129,7 +129,7 @@ Service → **Environment**:
 
 | Key | Value |
 | --- | --- |
-| `BACKEND_URL` | `https://myfinance-backend-aidt.onrender.com` |
+| `BACKEND_URL` | `https://myfinance-backend-38rs.onrender.com` |
 | `NODE_VERSION` | `22` |
 
 `PORT` is injected by Render. Do not set it.
@@ -149,7 +149,7 @@ the build rather than the first request:
 ```
 Error: Failed to collect configuration for /budgets
   [cause]: Error: BACKEND_URL is not set. Point it at the Spring Boot API, e.g.
-           BACKEND_URL=https://myfinance-backend-aidt.onrender.com
+           BACKEND_URL=https://myfinance-backend-38rs.onrender.com
 ```
 
 That is the intended behaviour. The earliest possible failure with the variable
@@ -229,7 +229,7 @@ frontend is broken when it is not.
 A cheap mitigation is to wake the backend before you demo it:
 
 ```bash
-curl -s https://myfinance-backend-aidt.onrender.com/actuator/health
+curl -s https://myfinance-backend-38rs.onrender.com/actuator/health
 ```
 
 Also inherited from the backend's plan: `@Scheduled` jobs do not run while it

@@ -52,7 +52,7 @@ services:
       # The one variable this app actually needs. Server-side only: it is read
       # in src/lib/api/client.ts and never shipped to the browser.
       - key: BACKEND_URL
-        value: https://myfinance-backend-aidt.onrender.com
+        value: https://myfinance-backend-38rs.onrender.com
 
       # Also pinned in .node-version, which Render reads on its own. Stated
       # twice deliberately — the file covers anyone building locally or in CI,
