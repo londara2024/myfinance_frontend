@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    image: myfinance-web
+    container_name: myfinance-web
+    ports:
+      - "3000:3000"
+    environment:
+      # The Spring Boot API, reached from inside the container. Override with
+      #   BACKEND_URL=http://other-host:8080 docker compose up
+      BACKEND_URL: ${BACKEND_URL:-http://192.168.18.30:8080}
+    restart: unless-stopped

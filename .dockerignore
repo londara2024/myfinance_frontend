@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.gitignore
+Dockerfile
+.dockerignore
+docker-compose.yml
+npm-debug.log*
+*.tsbuildinfo
+next-env.d.ts
+
+# Env files stay out of the image — BACKEND_URL is passed to the container.
+.env*
+!.env.example
