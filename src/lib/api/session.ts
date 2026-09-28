@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+﻿import { cookies, headers } from "next/headers";
 
 import type { SessionResponse } from "./types";
 
@@ -18,6 +18,32 @@ const TOKEN_COOKIE = "myfinance_token";
 
 /** A small, non-sensitive copy of who is signed in, so the shell can render without a round trip. */
 const PROFILE_COOKIE = "myfinance_profile";
+
+/**
+ * Whether the cookies carry the `Secure` flag, decided per request.
+ *
+ * <p>Browsers silently drop a `Secure` cookie sent over plain http from anything but `localhost`, so
+ * a fixed "Secure in production" rule made `http://192.168.x.x:3000` (Docker on a LAN) unable to
+ * sign in. Instead: Secure whenever the request itself arrived over https — Render and a Cloudflare
+ * Tunnel both terminate TLS in front of us and say so in `x-forwarded-proto`, and a Server Action's
+ * `Origin` names the scheme the browser used. Plain http gets a plain cookie, which is the only kind
+ * that browser would keep anyway.
+ *
+ * <p>`COOKIE_SECURE=true|false` forces it either way.
+ */
+async function isSecureRequest(): Promise<boolean> {
+  const forced = process.env.COOKIE_SECURE?.trim().toLowerCase();
+  if (forced === "true" || forced === "false") {
+    return forced === "true";
+  }
+  if (process.env.NODE_ENV !== "production") {
+    return false;
+  }
+  const h = await headers();
+  // A proxy chain can append: "https, http". The first entry is what the browser used.
+  const proto = h.get("x-forwarded-proto")?.split(",")[0]?.trim().toLowerCase();
+  return proto === "https" || (h.get("origin")?.startsWith("https://") ?? false);
+}
 
 export type SessionProfile = {
   userId: string;
@@ -50,6 +76,7 @@ export async function getProfile(): Promise<SessionProfile | undefined> {
 /** Called from the login / register Server Actions. */
 export async function startSession(session: SessionResponse): Promise<void> {
   const store = await cookies();
+  const secure = await isSecureRequest();
 
   // Mirror the backend's own expiry so the cookie and the server-side session row die together.
   // Otherwise the cookie outlives the session and every request 401s with the user still "signed in".
@@ -60,7 +87,7 @@ export async function startSession(session: SessionResponse): Promise<void> {
     sameSite: "lax",
     // Lax rather than Strict: Strict would drop the cookie on a top-level navigation from an
     // external link, so following a link into the app would look like a logout.
-    secure: process.env.NODE_ENV === "production",
+    secure,
     path: "/",
     expires,
   });
@@ -79,7 +106,7 @@ export async function startSession(session: SessionResponse): Promise<void> {
   store.set(PROFILE_COOKIE, JSON.stringify(profile), {
     httpOnly: false,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure,
     path: "/",
     expires,
   });

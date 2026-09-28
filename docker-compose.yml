@@ -6,7 +6,30 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # The Spring Boot API, reached from inside the container. Override with
-      #   BACKEND_URL=http://other-host:8080 docker compose up
+      # The Spring Boot API, reached from inside the container (server-side only,
+      # so the backend does not need to be exposed through the tunnel).
       BACKEND_URL: ${BACKEND_URL:-http://192.168.18.30:8080}
+      # Cookies are Secure per request: yes via the https tunnel, no via
+      # http://192.168.18.30:3000 — so both work with nothing set here.
+      # COOKIE_SECURE=true|false in .env forces one or the other.
+      COOKIE_SECURE: ${COOKIE_SECURE:-}
+    restart: unless-stopped
+
+  # Cloudflare Tunnel. Start with:  docker compose --profile tunnel up -d
+  # In the Cloudflare dashboard, point the tunnel's public hostname at
+  #   http://web:3000
+  # (the compose service name, not localhost — localhost is cloudflared itself).
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: myfinance-tunnel
+    profiles: ["tunnel"]
+    command: tunnel --no-autoupdate run
+    environment:
+      # From Zero Trust -> Networks -> Tunnels -> your tunnel. Put it in .env
+      # (git-ignored), never in this file.
+      # (Not `:?` — compose interpolates every service, so a required variable
+      # would break `docker compose up` without the tunnel profile too.)
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      - web
     restart: unless-stopped
